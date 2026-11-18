@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#09080b">
+<title>BPP Rulett</title>
+<style>
+:root{--gold:#e5bd69;--gold2:#9b702c;--red:#c71938;--ink:#08080c;--cream:#fff3d5}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;overflow-x:hidden;color:#fff7e9;background:radial-gradient(ellipse at 50% 34%,#42202a 0,#1b1118 42%,#08080b 100%);font-family:Georgia,'Times New Roman',serif}
+header{height:78px;display:grid;place-items:center;position:relative;z-index:2;background:linear-gradient(90deg,#08070a,#21170f 50%,#08070a);border-bottom:1px solid #bd914d88;box-shadow:0 7px 30px #0009}
+header h1{margin:0;font-size:clamp(27px,5vw,40px);letter-spacing:5px;text-transform:uppercase;color:#f7e6bc;text-shadow:0 0 16px #d3a44d66,0 2px #000}
+main{width:min(900px,92vw);margin:16px auto 32px;position:relative;z-index:1}
+.tagline{text-align:center;margin:0 0 17px;color:#d7bd8c;font:11px Arial,sans-serif;letter-spacing:3px;text-transform:uppercase}
+.table{padding:clamp(10px,2vw,18px);border-radius:23px;background:linear-gradient(135deg,#fff0c7,#8e713e 10%,#282126 22%,#09090c 75%,#c7a15c 94%,#fff0c7);box-shadow:0 25px 60px #000c,inset 0 2px 5px #fff9}
+.inner{border:2px solid var(--gold);border-radius:21px;padding:clamp(10px,2vw,17px);background:radial-gradient(ellipse at 50% 20%,#4a1b28,#1b1017 58%,#09090d);box-shadow:inset 0 0 38px #000c,0 0 0 5px #241b1c}
+.wheel-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(210px,.65fr);align-items:center;gap:clamp(12px,2vw,22px);max-width:760px;margin:auto}
+.wheel-stage{display:grid;place-items:center;padding:8px 0 15px;perspective:1100px}
+.wheel-frame{width:min(48vw,340px);aspect-ratio:1;border-radius:50%;padding:13px;position:relative;background:linear-gradient(140deg,#fff0c8,#b98b40 16%,#4a3822 34%,#f0d18c 51%,#735126 75%,#fbe9b9);box-shadow:0 19px 27px #000c,inset 0 2px 5px #fff;transform:rotateX(9deg);transform-style:preserve-3d}
+.wheel{position:relative;width:100%;height:100%;border-radius:50%;border:9px ridge #d4ae61;background:#161116;box-shadow:inset 0 0 0 7px #171016,inset 0 0 30px #000,0 0 0 3px #09080a;transform:rotate(0deg);transition:transform 5.1s cubic-bezier(.08,.72,.08,1);overflow:hidden}
+.wheel:before{content:"";position:absolute;inset:8%;border-radius:50%;border:5px double #e4c47e;box-shadow:0 0 0 4px #20171a,inset 0 0 20px #000;z-index:1;pointer-events:none}
+.wheel:after{content:"";position:absolute;inset:36%;border-radius:50%;background:radial-gradient(circle at 35% 27%,#fff4d2,#d8b56b 18%,#7e5a2c 44%,#211812 73%);border:6px ridge #f0d28c;box-shadow:0 5px 14px #000;z-index:2}
+.pocket{position:absolute;inset:0;border-radius:50%;color:#fff3d8;font:bold clamp(9px,1.55vw,14px) Arial,sans-serif;text-shadow:0 1px 3px #000}
+.pocket span{position:absolute;left:50%;top:11%;transform:translateX(-50%);display:block}
+.hub-label{display:none}
+.pointer{position:absolute;z-index:5;top:-2px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:30px solid #fff0c7;filter:drop-shadow(0 3px 4px #000)}
+.ball-track{position:absolute;z-index:4;inset:7%;border-radius:50%;border:2px dashed #e8c77966;pointer-events:none}
+.ball{position:absolute;z-index:6;left:50%;top:7%;width:15px;height:15px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff,#d8d6d0 35%,#79767b 75%,#28252a);box-shadow:0 2px 7px #000;transform:translate(-50%,-50%);transition:top .8s,left .8s}
+.wheel-side{display:flex;flex-direction:column;gap:13px}
+.panel{border:1px solid #c49a50;border-radius:15px;padding:12px;background:linear-gradient(145deg,#28171b,#100d11);box-shadow:0 8px 20px #0006,inset 0 1px #fff1}
+.panel-title{color:#d8b56e;font:11px Arial,sans-serif;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+.result-number{font:bold 50px Georgia;color:#f7e5bd;line-height:1;text-shadow:0 0 17px #d8a84955}
+.result-color{margin-top:7px;color:#d8bd89;font:12px Arial,sans-serif;letter-spacing:2px}
+.status{font:14px/1.5 Arial,sans-serif;color:#f0e5d4;min-height:42px}
+.attempts{display:flex;justify-content:space-between;align-items:center;font:12px Arial,sans-serif;color:#d8c7a6}
+.attempts strong{font:bold 24px Georgia;color:#fff0c9}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:12px}
+button{border:1px solid #ffffff55;border-radius:11px;padding:11px 8px;color:white;font:bold 12px Arial,sans-serif;letter-spacing:1.2px;cursor:pointer;text-transform:uppercase;box-shadow:0 5px 0 #0008,0 8px 16px #0006;transition:.18s}
+button:hover:not(:disabled){filter:brightness(1.18);transform:translateY(-2px)}
+button:active:not(:disabled){transform:translateY(2px);box-shadow:0 2px 0 #0008}
+button:disabled{opacity:.38;cursor:not-allowed}
+.red-btn{background:linear-gradient(145deg,#ef3451,#8b1026)}
+.black-btn{background:linear-gradient(145deg,#454047,#09090d)}
+.spin-btn{grid-column:1/-1;background:linear-gradient(145deg,#fff0c9,#c79b4f 45%,#75501e);color:#20160b;border-color:#fff0c9;font-size:14px}
+.new-btn{grid-column:1/-1;background:linear-gradient(145deg,#8b642d,#39240d);border-color:#e3bf72;color:#fff1ce}
+.result-box{display:none;margin-top:13px;padding:16px;border:1px solid var(--gold);border-radius:13px;background:linear-gradient(135deg,#3a2020,#171015 55%,#2a1c0b);text-align:center}
+.result-box.show{display:block;animation:pop .45s ease}
+.result-box h2{font-size:clamp(17px,3vw,24px);margin:0 0 8px;color:#ffe8b8}
+.result-box p{font:14px/1.5 Arial,sans-serif;margin:7px 0}
+.chocolate{margin:14px auto 2px;width:160px;height:82px;border-radius:10px;transform:rotate(-4deg);background:linear-gradient(135deg,#8c1d36,#4a1025 45%,#210b15);border:3px solid #e0bd76;box-shadow:0 7px 0 #16070d,0 12px 20px #0008;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#f7e7ed;text-shadow:1px 2px #34101c}
+.chocolate b{font:bold italic 27px Georgia}.chocolate small{font:9px Arial;letter-spacing:2px}
+@keyframes pop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.floaties{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.float{position:absolute;bottom:-75px;left:var(--x);font-size:var(--size);opacity:.2;animation:rise var(--duration) linear infinite;animation-delay:var(--delay);filter:drop-shadow(0 0 8px #d4b36d)}
+.float.card{font-family:Georgia,serif;font-weight:bold;text-shadow:0 2px 5px #000}
+.ball8{width:43px;height:43px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 30% 24%,#555,#09090c 55%,#000);border:1px solid #777;box-shadow:inset -5px -6px 10px #000,0 5px 10px #0009;color:#111;font:bold 15px Arial}
+.ball8 span{background:#eee;border-radius:50%;width:20px;height:20px;display:grid;place-items:center}
+@keyframes rise{0%{transform:translate3d(0,0,0) rotate(0);opacity:0}12%{opacity:.2}90%{opacity:.18}100%{transform:translate3d(var(--drift),-115vh,0) rotate(360deg);opacity:0}}
+.spark{position:fixed;width:3px;height:3px;border-radius:50%;background:#ffe9b4;box-shadow:0 0 9px 3px #d9b66e;opacity:.5;pointer-events:none;animation:twinkle 2.5s infinite alternate}
+@keyframes twinkle{to{opacity:.08;transform:scale(.4)}}
+footer{text-align:center;color:#a18a62;font:11px Arial,sans-serif;margin:18px 0}
+@media(max-width:700px){.wheel-layout{grid-template-columns:1fr}.wheel-frame{width:min(66vw,300px)}.wheel-side{display:grid;grid-template-columns:1fr 1fr}.panel.status-panel{grid-column:1/-1}.panel.attempt-panel{grid-column:1/-1}.controls{grid-column:1/-1}.result-number{font-size:40px}}
+@media(max-width:420px){header{height:62px}.inner{padding:11px 8px}.wheel-frame{width:min(68vw,270px);padding:9px}.wheel-layout{gap:5px}.panel{padding:12px}.controls{gap:9px}button{padding:14px 7px;font-size:12px}}
+</style>
+</head>
+<body>
+<div class="floaties" aria-hidden="true">
+ <span class="float card" style="--x:5%;--size:45px;--duration:19s;--delay:-4s;--drift:55px">♠</span>
+ <span class="float card" style="--x:18%;--size:40px;--duration:24s;--delay:-12s;--drift:-50px">♥</span>
+ <span class="float card" style="--x:36%;--size:43px;--duration:21s;--delay:-8s;--drift:65px">♣</span>
+ <span class="float card" style="--x:57%;--size:42px;--duration:25s;--delay:-16s;--drift:-55px">♦</span>
+ <span class="float card" style="--x:82%;--size:44px;--duration:20s;--delay:-10s;--drift:45px">♠</span>
+ <span class="float" style="--x:28%;--size:35px;--duration:22s;--delay:-15s;--drift:45px">🎱</span>
+ <span class="float" style="--x:73%;--size:36px;--duration:26s;--delay:-19s;--drift:-45px">🎱</span>
+ <span class="float" style="--x:92%;--size:31px;--duration:23s;--delay:-6s;--drift:40px">✦</span>
+</div>
+<header><h1>BPP Rulett</h1></header>
+<main>
+ <p class="tagline">A szerencse forgandó • Tippelj és pörgess!</p>
+ <section class="table"><div class="inner">
+  <div class="wheel-layout">
+   <div class="wheel-stage">
+    <div class="wheel-frame">
+     <div class="pointer"></div><div class="ball-track"></div><div class="ball" id="ball"></div>
+     <div class="wheel" id="wheel"><div class="hub-label"></div></div>
+    </div>
+   </div>
+   <div class="wheel-side">
+    <div class="panel">
+     <div class="panel-title">A pörgetés eredménye</div>
+     <div class="result-number" id="resultNumber">—</div>
+     <div class="result-color" id="resultColor">MÉG NINCS EREDMÉNY</div>
+    </div>
+    <div class="panel status-panel">
+     <div class="panel-title">Játék állapota</div>
+     <div class="status" id="status" aria-live="polite">Válassz piros vagy fekete színt, majd pörgess!</div>
+    </div>
+    <div class="panel attempt-panel">
+     <div class="attempts"><span>PRÓBÁLKOZÁS MARADT</span><strong id="tries">5</strong></div>
+    </div>
+   </div>
+  </div>
+  <div class="controls">
+   <button class="red-btn" id="redBtn">PIROS</button>
+   <button class="black-btn" id="blackBtn">FEKETE</button>
+   <button class="spin-btn" id="spinBtn" disabled>✦ PÖRGETÉS ✦</button>
+   <button class="new-btn" id="newBtn">ÚJ JÁTÉK</button>
+  </div>
+  <div class="result-box" id="resultBox" aria-live="polite"></div>
+ </div></section>
+ <footer>BPP Rulett • Baráti játék, valódi pénz nélkül.</footer>
+</main>
+<script>
+const wheel=document.getElementById('wheel'), ball=document.getElementById('ball');
+const redBtn=document.getElementById('redBtn'), blackBtn=document.getElementById('blackBtn');
+const spinBtn=document.getElementById('spinBtn'), newBtn=document.getElementById('newBtn');
+const statusEl=document.getElementById('status'), triesEl=document.getElementById('tries');
+const resultNumber=document.getElementById('resultNumber'), resultColor=document.getElementById('resultColor');
+const resultBox=document.getElementById('resultBox');
+const reds=new Set([1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35]);
+const pocketOrder=[1,20,3,22,5,24,7,26,9,28,11,30,13,32,15,34,17,36,19,2,21,4,23,6,25,8,27,10,29,12,31,14,33,16,35,18];
+let choice=null,tries=5,spinning=false,finished=false,rotation=0;
+function paintPockets(){
+ const stops=[];
+ for(let i=0;i<36;i++) stops.push(`${i%2===0?'#bd1733':'#111116'} ${i*10}deg ${(i+1)*10}deg`);
+ wheel.style.background=`conic-gradient(from -5deg,${stops.join(',')})`;
+}
+paintPockets();
+function setChoice(c){
+ if(spinning||finished)return;
+ choice=c;
+ statusEl.textContent='A tipped: '+(c==='red'?'PIROS':'FEKETE')+'. Indíthatod a pörgetést!';
+ redBtn.style.outline=c==='red'?'3px solid #ffe2a2':'none';
+ blackBtn.style.outline=c==='black'?'3px solid #ffe2a2':'none';
+ spinBtn.disabled=false;
+}
+redBtn.addEventListener('click',()=>setChoice('red'));
+blackBtn.addEventListener('click',()=>setChoice('black'));
+function lock(v){
+ redBtn.disabled=v||finished;blackBtn.disabled=v||finished;
+ spinBtn.disabled=v||finished||!choice;
+}
+function randomIndex(){
+ const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%36;
+}
+spinBtn.addEventListener('click',()=>{
+ if(!choice||spinning||finished||tries<1)return;
+ spinning=true;lock(true);resultBox.classList.remove('show');resultBox.innerHTML='';
+ statusEl.textContent='Pörög a kerék… figyeld, melyik számnál áll meg a golyó!';
+ const idx=randomIndex(),number=pocketOrder[idx],color=reds.has(number)?'red':'black';
+ const sectorCenter=idx*10+5;
+ const current=((rotation%360)+360)%360;
+ const desired=((360-sectorCenter)%360);
+ const delta=(desired-current+360)%360;
+ rotation+=delta+(6+Math.floor(Math.random()*3))*360;
+ wheel.style.transform=`rotate(${rotation}deg)`;
+ ball.style.top='8%';ball.style.left='50%';
+ setTimeout(()=>{
+  spinning=false;tries--;triesEl.textContent=tries;
+  resultNumber.textContent='';
+  resultNumber.style.color=color==='red'?'#f0445c':'#f4e8d4';
+  resultColor.textContent=color==='red'?'PIROS':'FEKETE';
+  resultColor.style.color=color==='red'?'#f0445c':'#f4e8d4';
+  if(color===choice){
+   finished=true;lock(false);statusEl.textContent='Talált! A tipped helyes volt!';
+   resultBox.innerHTML='<h2>🎉 GRATULÁLOK, NYERTETEK MILKA CSOKIT! 🍫</h2><div class="chocolate"><b>Milka</b><small>CSOKOLÁDÉ</small></div><p>Kövi dráma órán kaptok!</p>';
+   resultBox.classList.add('show');
+  }else if(tries===0){
+   finished=true;lock(false);statusEl.textContent='Lezárult az 5 pörgetés. Indíthatsz új játékot!';
+   resultBox.innerHTML='<h2>KÖSZÖNJÜK A JÁTÉKOT! ✨</h2><p>Ez a kör véget ért. Ha szeretnéd, indíts új játékot!</p>';
+   resultBox.classList.add('show');
+  }else{
+   statusEl.textContent='Most '+(color==='red'?'PIROS':'FEKETE')+' jött ki. Ez most nem talált. Tippelj újra!';
+   choice=null;redBtn.style.outline='none';blackBtn.style.outline='none';lock(false);
+  }
+ },5250);
+});
+newBtn.addEventListener('click',()=>{
+ choice=null;tries=5;spinning=false;finished=false;rotation=0;
+ wheel.style.transition='none';wheel.style.transform='rotate(0deg)';void wheel.offsetWidth;
+ wheel.style.transition='transform 5.1s cubic-bezier(.08,.72,.08,1)';
+ ball.style.top='8%';ball.style.left='50%';
+ triesEl.textContent='5';resultNumber.textContent='—';resultNumber.style.color='#f7e5bd';
+ resultColor.textContent='MÉG NINCS EREDMÉNY';resultColor.style.color='#d8bd89';
+ statusEl.textContent='Új játék indul! Válassz piros vagy fekete színt, majd pörgess!';
+ resultBox.classList.remove('show');resultBox.innerHTML='';
+ redBtn.style.outline='none';blackBtn.style.outline='none';lock(false);
+});
+for(let i=0;i<26;i++){const s=document.createElement('i');s.className='spark';s.style.left=(Math.random()*100)+'%';s.style.top=(Math.random()*100)+'%';s.style.animationDelay=(Math.random()*3)+'s';document.body.appendChild(s);}
+</script>
+</body>
+</html>
